@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import this package for SystemChrome
 import 'package:http/http.dart' as http;
-import 'package:khonobuzz/background_widget.dart'; // Import the new BackgroundWidget
+import 'package:khonobuzz/auth_screens.dart'; // Import the new auth_screens.dart
 import 'dart:convert';
 
 void main() {
@@ -134,69 +134,21 @@ class _MainAppState extends State<MainApp> {
             PageView(
               controller: _pageController,
               children: [
-                BackgroundWidget(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextField(
-                            controller: _registerUsernameController,
-                            decoration: InputDecoration(labelText: 'Username'),
-                          ),
-                          TextField(
-                            controller: _registerPasswordController,
-                            decoration: InputDecoration(labelText: 'Password'),
-                            obscureText: true,
-                          ),
-                          SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: _register,
-                            child: Text('Register'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              _pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
-                            },
-                            child: Text('Already have an account? Login'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                RegisterScreen(
+                  usernameController: _registerUsernameController,
+                  passwordController: _registerPasswordController,
+                  onRegisterPressed: _register,
+                  onLoginPressed: () {
+                    _pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+                  },
                 ),
-                BackgroundWidget(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextField(
-                            controller: _loginUsernameController,
-                            decoration: InputDecoration(labelText: 'Username'),
-                          ),
-                          TextField(
-                            controller: _loginPasswordController,
-                            decoration: InputDecoration(labelText: 'Password'),
-                            obscureText: true,
-                          ),
-                          SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: _login,
-                            child: Text('Login'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              _pageController.animateToPage(0, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
-                            },
-                            child: Text('Don\'t have an account? Register'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                LoginScreen(
+                  usernameController: _loginUsernameController,
+                  passwordController: _loginPasswordController,
+                  onLoginPressed: _login,
+                  onRegisterPressed: () {
+                    _pageController.animateToPage(0, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+                  },
                 ),
               ],
             ),
