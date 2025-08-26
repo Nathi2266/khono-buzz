@@ -152,15 +152,6 @@ class _MainAppState extends State<MainApp> {
                 ),
               ],
             ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Image.asset(
-                'assets/images/discs.png',
-                fit: BoxFit.fitWidth, // Adjust as needed to match the image
-              ),
-            ),
           ],
         ),
       ),
