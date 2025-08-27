@@ -3,6 +3,7 @@ import 'package:flutter/services.dart'; // Import this package for SystemChrome
 import 'package:http/http.dart' as http;
 import 'package:khonobuzz/auth_screens.dart'; // Import the new auth_screens.dart
 import 'dart:convert';
+import 'package:khonobuzz/LandingScreen.dart'; // Import the LandingScreen
 
 void main() {
   // Ensure that Flutter's widgets are initialized before the SystemChrome call
@@ -92,6 +93,7 @@ class _MainAppState extends State<MainApp> {
       _showSnackBar(message);
       _registerUsernameController.clear();
       _registerPasswordController.clear();
+      _pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeIn); // Navigate to login screen
     } catch (e) {
       _showSnackBar(e.toString(), isError: true);
     }
@@ -128,33 +130,25 @@ class _MainAppState extends State<MainApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Scaffold(
-        body: Stack(
-          children: [
-            PageView(
-              controller: _pageController,
-              children: [
-                RegisterScreen(
-                  usernameController: _registerUsernameController,
-                  passwordController: _registerPasswordController,
-                  onRegisterPressed: _register,
-                  onLoginPressed: () {
-                    _pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
-                  },
-                ),
-                LoginScreen(
-                  usernameController: _loginUsernameController,
-                  passwordController: _loginPasswordController,
-                  onLoginPressed: _login,
-                  onRegisterPressed: () {
-                    _pageController.animateToPage(0, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
-                  },
-                ),
-              ],
+      home: const LandingScreen(), // Set LandingScreen as the initial home
+      routes: {
+        '/login': (context) => LoginScreen(
+              usernameController: _loginUsernameController,
+              passwordController: _loginPasswordController,
+              onLoginPressed: _login,
+              onRegisterPressed: () {
+                Navigator.pushReplacementNamed(context, '/register');
+              },
             ),
-          ],
-        ),
-      ),
+        '/register': (context) => RegisterScreen(
+              usernameController: _registerUsernameController,
+              passwordController: _registerPasswordController,
+              onRegisterPressed: _register,
+              onLoginPressed: () {
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+            ),
+      },
     );
   }
 }

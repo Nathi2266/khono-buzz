@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import, deprecated_member_use, use_super_parameters, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:khonobuzz/main.dart'; // Import main.dart for AuthService and controllers
 import 'dart:async'; // Added this import
@@ -80,7 +82,7 @@ class BlinkingImage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _BlinkingImageState createState() => _BlinkingImageState();
+   createState() => _BlinkingImageState();
 }
 
 class _BlinkingImageState extends State<BlinkingImage>
@@ -132,7 +134,7 @@ class _BlinkingImageState extends State<BlinkingImage>
     // The animation is from 1.0 to 0.0, so controller.value = 0.0 corresponds to opaque.
     _controller.value = 0.0;
     _delayTimer?.cancel();
-    _delayTimer = Timer(const Duration(seconds: 8), () { // Changed from 8 seconds to 7 seconds
+    _delayTimer = Timer(const Duration(seconds: 7), () { // Corrected from 8 seconds back to 7 seconds
       // After 7 seconds, start the first fade out for the blinking effect
       _controller.forward();
     });
@@ -159,6 +161,116 @@ class _BlinkingImageState extends State<BlinkingImage>
   }
 }
 
+// A custom reusable widget for a flowing button.
+class FlowingButton extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onPressed;
+  final Color startColor;
+  final Color endColor;
+  final Duration animationDuration;
+  final EdgeInsetsGeometry? padding;
+  final OutlinedBorder? shape;
+  final ButtonType buttonType; // New parameter to differentiate button types
+
+  const FlowingButton({
+    Key? key,
+    required this.child,
+    required this.onPressed,
+    this.startColor = const Color(0xFFe91e63),
+    this.endColor = const Color(0xFFc2185b),
+    this.animationDuration = const Duration(milliseconds: 300),
+    this.padding,
+    this.shape,
+    this.buttonType = ButtonType.elevated, // Default to elevated button
+  }) : super(key: key);
+
+  @override
+  _FlowingButtonState createState() => _FlowingButtonState();
+}
+
+enum ButtonType {
+  elevated,
+  text,
+}
+
+class _FlowingButtonState extends State<FlowingButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Color?> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.animationDuration,
+    );
+    _animation = ColorTween(
+      begin: widget.startColor,
+      end: widget.endColor,
+    ).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    _controller.forward();
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    _controller.reverse();
+    widget.onPressed();
+  }
+
+  void _handleTapCancel() {
+    _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          if (widget.buttonType == ButtonType.elevated) {
+            return ElevatedButton(
+              onPressed: () => widget.onPressed(), // Correctly pass the onPressed callback
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _animation.value, // Use animated color
+                shape: widget.shape ?? RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                padding: widget.padding ?? const EdgeInsets.symmetric(
+                  horizontal: 50.0,
+                  vertical: 15.0,
+                ),
+                elevation: 5,
+              ),
+              child: widget.child,
+            );
+          } else {
+            return TextButton(
+              onPressed: () => widget.onPressed(), // Correctly pass the onPressed callback
+              style: TextButton.styleFrom(
+                foregroundColor: _animation.value, // Use animated color for text
+                padding: widget.padding,
+              ),
+              child: widget.child,
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+
 // This is the main widget for your login screen.
 class LoginScreen extends StatelessWidget {
   final TextEditingController usernameController;
@@ -178,6 +290,16 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent, // Reverted to transparent for background image
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigate back to the previous screen (LandingScreen)
+          },
+        ),
+      ),
       body: Stack(
         children: [
           // Background Image
@@ -207,19 +329,17 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
                   // The Confirm button
-                  ElevatedButton(
+                  FlowingButton(
                     onPressed: onLoginPressed,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFe91e63), // A subtle red color
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 50.0,
-                        vertical: 15.0,
-                      ),
-                      elevation: 5,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 70.0, // Adjusted padding
+                      vertical: 15.0,
                     ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                    startColor: const Color(0xFFe91e63),
+                    endColor: const Color(0xFFc2185b),
                     child: const Text(
                       'CONFIRM',
                       style: TextStyle(
@@ -229,11 +349,14 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  TextButton(
+                  FlowingButton(
                     onPressed: onRegisterPressed,
+                    buttonType: ButtonType.text,
+                    startColor: Colors.white70,
+                    endColor: Colors.white,
                     child: const Text(
                       "Don't have an account? Register",
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: Colors.white70), // Keep the original text style
                     ),
                   ),
                 ],
@@ -272,6 +395,16 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent, // Reverted to transparent for background image
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigate back to the previous screen (LandingScreen)
+          },
+        ),
+      ),
       body: Stack(
         children: [
           // Background Image
@@ -301,19 +434,17 @@ class RegisterScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
                   // The Confirm button
-                  ElevatedButton(
+                  FlowingButton(
                     onPressed: onRegisterPressed,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFe91e63), // A subtle red color
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 50.0,
-                        vertical: 15.0,
-                      ),
-                      elevation: 5,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 70.0, // Adjusted padding
+                      vertical: 15.0,
                     ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                    startColor: const Color(0xFFe91e63),
+                    endColor: const Color(0xFFc2185b),
                     child: const Text(
                       'REGISTER',
                       style: TextStyle(
@@ -323,11 +454,14 @@ class RegisterScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  TextButton(
+                  FlowingButton(
                     onPressed: onLoginPressed,
+                    buttonType: ButtonType.text,
+                    startColor: Colors.white70,
+                    endColor: Colors.white,
                     child: const Text(
                       "Already have an account? Login",
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: Colors.white70), // Keep the original text style
                     ),
                   ),
                 ],
