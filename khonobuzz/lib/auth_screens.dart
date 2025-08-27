@@ -275,7 +275,7 @@ class _FlowingButtonState extends State<FlowingButton>
 class LoginScreen extends StatelessWidget {
   final TextEditingController usernameController;
   final TextEditingController passwordController;
-  final VoidCallback onLoginPressed;
+  final void Function(BuildContext context) onLoginPressed;
   final VoidCallback onRegisterPressed;
 
   const LoginScreen({
@@ -290,18 +290,18 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent, // Reverted to transparent for background image
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context); // Navigate back to the previous screen (LandingScreen)
-          },
-        ),
-      ),
       body: Stack(
         children: [
+          Positioned(
+            top: 20,
+            left: 20,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30), // Increased size
+              onPressed: () {
+                Navigator.pop(context); // Navigate back to the previous screen (LandingScreen)
+              },
+            ),
+          ),
           // Background Image
           Positioned.fill(
             child: Image.asset(
@@ -330,7 +330,7 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 40),
                   // The Confirm button
                   FlowingButton(
-                    onPressed: onLoginPressed,
+                    onPressed: () => onLoginPressed(context),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 70.0, // Adjusted padding
                       vertical: 15.0,
@@ -380,7 +380,7 @@ class LoginScreen extends StatelessWidget {
 class RegisterScreen extends StatelessWidget {
   final TextEditingController usernameController;
   final TextEditingController passwordController;
-  final VoidCallback onRegisterPressed;
+  final void Function(BuildContext context) onRegisterPressed;
   final VoidCallback onLoginPressed;
 
   const RegisterScreen({
@@ -395,18 +395,18 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent, // Reverted to transparent for background image
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context); // Navigate back to the previous screen (LandingScreen)
-          },
-        ),
-      ),
       body: Stack(
         children: [
+          Positioned(
+            top: 20,
+            left: 20,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30), // Increased size
+              onPressed: () {
+                Navigator.pop(context); // Navigate back to the previous screen (LandingScreen)
+              },
+            ),
+          ),
           // Background Image
           Positioned.fill(
             child: Image.asset(
@@ -435,7 +435,7 @@ class RegisterScreen extends StatelessWidget {
                   const SizedBox(height: 40),
                   // The Confirm button
                   FlowingButton(
-                    onPressed: onRegisterPressed,
+                    onPressed: () => onRegisterPressed(context),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 70.0, // Adjusted padding
                       vertical: 15.0,

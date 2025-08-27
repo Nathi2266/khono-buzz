@@ -4,13 +4,26 @@ import 'package:http/http.dart' as http;
 import 'package:khonobuzz/auth_screens.dart'; // Import the new auth_screens.dart
 import 'dart:convert';
 import 'package:khonobuzz/LandingScreen.dart'; // Import the LandingScreen
+import 'package:flutter/rendering.dart'; // Import for debugPaintSizeEnabled
+import 'package:khonobuzz/DashboardScreen.dart'; // Import the DashboardScreen
+
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 void main() {
   // Ensure that Flutter's widgets are initialized before the SystemChrome call
   WidgetsFlutterBinding.ensureInitialized();
   
-  // This line makes the app full-screen by hiding all system UI overlays
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+  // This line makes the app draw full-screen, extending behind system UI overlays.
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent, // Make status bar transparent
+    systemNavigationBarColor: Colors.transparent, // Make navigation bar transparent
+    systemNavigationBarIconBrightness: Brightness.light, // For dark navigation icons
+    statusBarIconBrightness: Brightness.light, // For dark status bar icons
+  ));
+
+  // Disable debug paint size boxes for a cleaner debug view
+  debugPaintSizeEnabled = false;
 
   runApp(const MainApp());
 }
@@ -76,7 +89,7 @@ class _MainAppState extends State<MainApp> {
   final TextEditingController _loginPasswordController = TextEditingController();
 
   void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: isError ? Colors.red : Colors.green,
@@ -84,7 +97,7 @@ class _MainAppState extends State<MainApp> {
     );
   }
 
-  Future<void> _register() async {
+  Future<void> _register(BuildContext context) async {
     try {
       final message = await _authService.register(
         _registerUsernameController.text,
@@ -99,14 +112,17 @@ class _MainAppState extends State<MainApp> {
     }
   }
 
-  Future<void> _login() async {
+  Future<void> _login(BuildContext context) async {
     try {
       final message = await _authService.login(
         _loginUsernameController.text,
         _loginPasswordController.text,
       );
       _showSnackBar(message);
-      // Navigate to another screen or update UI on successful login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardScreen()),
+      );
     } catch (e) {
       _showSnackBar(e.toString(), isError: true);
     }
@@ -130,12 +146,13 @@ class _MainAppState extends State<MainApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      scaffoldMessengerKey: scaffoldMessengerKey, // Assign the GlobalKey here
       home: const LandingScreen(), // Set LandingScreen as the initial home
       routes: {
         '/login': (context) => LoginScreen(
               usernameController: _loginUsernameController,
               passwordController: _loginPasswordController,
-              onLoginPressed: _login,
+              onLoginPressed: (context) => _login(context),
               onRegisterPressed: () {
                 Navigator.pushReplacementNamed(context, '/register');
               },
@@ -143,7 +160,7 @@ class _MainAppState extends State<MainApp> {
         '/register': (context) => RegisterScreen(
               usernameController: _registerUsernameController,
               passwordController: _registerPasswordController,
-              onRegisterPressed: _register,
+              onRegisterPressed: (context) => _register(context),
               onLoginPressed: () {
                 Navigator.pushReplacementNamed(context, '/login');
               },

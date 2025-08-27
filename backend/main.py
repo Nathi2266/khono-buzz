@@ -40,8 +40,8 @@ class User(db.Model):
 def register():
     # Get JSON data from the request body
     data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+    username = data.get('username').strip() if data.get('username') else None
+    password = data.get('password').strip() if data.get('password') else None
 
     # Basic input validation
     if not username or not password:
@@ -76,8 +76,8 @@ def register():
 def login():
     # Get JSON data from the request body
     data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+    username = data.get('username').strip() if data.get('username') else None
+    password = data.get('password').strip() if data.get('password') else None
 
     # Find the user by username
     user = User.query.filter_by(username=username).first()
@@ -94,13 +94,12 @@ def login():
 # ==================== Application Startup ====================
 
 # This function will create the database tables before the first request is handled
-@app.before_request
-def create_tables():
-    # Create the database and tables if they don't exist
-    db.create_all()
 
 # The main entry point of the application
 if __name__ == '__main__':
+    # Create the database tables if they don't exist (once at startup)
+    with app.app_context():
+        db.create_all()
     # Run the Flask development server
     # The 'host' parameter is set to '0.0.0.0' to make the server
     # accessible from other devices on the same network (like your Android phone)
