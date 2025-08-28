@@ -6,6 +6,9 @@ import 'dart:convert';
 import 'package:khonobuzz/LandingScreen.dart'; // Import the LandingScreen
 import 'package:flutter/rendering.dart'; // Import for debugPaintSizeEnabled
 import 'package:khonobuzz/DashboardScreen.dart'; // Import the DashboardScreen
+import 'package:khonobuzz/ResourceAllocationScreen.dart'; // Import the new ResourceAllocationScreen
+import 'package:khonobuzz/TimeAllocationScreen.dart'; // Import the new TimeAllocationScreen
+import 'package:khonobuzz/ProjectDataScreen.dart'; // Import the new ProjectDataScreen
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -119,10 +122,7 @@ class _MainAppState extends State<MainApp> {
         _loginPasswordController.text,
       );
       _showSnackBar(message);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
-      );
+      Navigator.pushReplacementNamed(context, '/dashboard'); // Navigate to DashboardScreen using named route
     } catch (e) {
       _showSnackBar(e.toString(), isError: true);
     }
@@ -165,6 +165,10 @@ class _MainAppState extends State<MainApp> {
                 Navigator.pushReplacementNamed(context, '/login');
               },
             ),
+        '/dashboard': (context) => const DashboardScreen(), // Add DashboardScreen route
+        '/resource_allocation': (context) => const ResourceAllocationScreen(),
+        '/time_allocation': (context) => const TimeAllocationScreen(),
+        '/project_data': (context) => const ProjectDataScreen(),
       },
     );
   }

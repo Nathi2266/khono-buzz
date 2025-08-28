@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 // import 'package:khonobuzz/auth_screens.dart'; // No longer needed directly here
 import 'package:khonobuzz/base_screen.dart'; // Import the new BaseScreen
 
-// This is the new dashboard screen for the app.
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+class ProjectDataScreen extends StatelessWidget {
+  const ProjectDataScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BaseScreen(
-      titleText: 'Dashboard',
+      titleText: 'Project Data',
       body: Center(
         child: const Text(
-          'Dashboard Content Goes Here',
+          'Project Data Content Goes Here',
           style: TextStyle(
             color: Colors.white54,
             fontSize: 18,
