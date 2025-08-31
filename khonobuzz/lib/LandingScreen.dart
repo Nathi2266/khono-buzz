@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:khonobuzz/auth_screens.dart'; // Corrected import for BlinkingImage
 
 // This is the main screen for your app's landing page.

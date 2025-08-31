@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:khonobuzz/base_screen.dart'; // Import the new BaseScreen
 
 class ProjectDataScreen extends StatelessWidget {
-  const ProjectDataScreen({Key? key}) : super(key: key);
+  const ProjectDataScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

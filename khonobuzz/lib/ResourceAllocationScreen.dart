@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:khonobuzz/base_screen.dart'; // Import the new BaseScreen
 
 class ResourceAllocationScreen extends StatelessWidget {
-  const ResourceAllocationScreen({Key? key}) : super(key: key);
+  const ResourceAllocationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

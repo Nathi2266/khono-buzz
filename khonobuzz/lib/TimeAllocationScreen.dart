@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:khonobuzz/base_screen.dart'; // Import the new BaseScreen
 
 class TimeAllocationScreen extends StatelessWidget {
-  const TimeAllocationScreen({Key? key}) : super(key: key);
+  const TimeAllocationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
