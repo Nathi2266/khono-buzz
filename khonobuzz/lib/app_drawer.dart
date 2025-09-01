@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:khonobuzz/routes.dart';
 
 // This is the custom drawer widget for your navigation menu.
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+  final VoidCallback? onLogout;
+  const AppDrawer({super.key, this.onLogout});
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +37,8 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
             onTap: () {
-              // TODO: Navigate to the Dashboard screen
               Navigator.pop(context); // Close the drawer
+              Navigator.pushNamed(context, AppRoutes.dashboard);
             },
           ),
 
@@ -55,8 +57,8 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
             onTap: () {
-              // TODO: Navigate to the Resource Allocation screen
               Navigator.pop(context);
+              Navigator.pushNamed(context, AppRoutes.resourceAllocation);
             },
           ),
           
@@ -75,8 +77,8 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
             onTap: () {
-              // TODO: Navigate to the Time Keeping screen
               Navigator.pop(context);
+              Navigator.pushNamed(context, AppRoutes.timeKeeping);
             },
           ),
           
@@ -95,8 +97,8 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
             onTap: () {
-              // TODO: Navigate to the Project Data screen
               Navigator.pop(context);
+              Navigator.pushNamed(context, AppRoutes.projectData);
             },
           ),
           
@@ -115,8 +117,8 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
             onTap: () {
-              // TODO: Implement logout functionality
               Navigator.pop(context);
+              onLogout?.call();
             },
           ),
         ],
@@ -124,25 +126,3 @@ class AppDrawer extends StatelessWidget {
     );
   }
 }
-
-// How to use the drawer in a Scaffold:
-// In your main screen (e.g., DashboardScreen), you can add the drawer to the Scaffold.
-/*
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Dashboard'),
-      ),
-      // This is where you add the custom drawer.
-      drawer: const AppDrawer(),
-      body: Center(
-        child: Text('Main Screen Content'),
-      ),
-    );
-  }
-}
-*/

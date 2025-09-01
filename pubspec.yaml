@@ -1,0 +1,11 @@
+name: khonobuzz
+
+environment:
+  sdk: '>=3.9.0 <4.0.0'
+
+flutter:
+  assets:
+    - assets/images/logo.png
+    - assets/images/rocket_icon.png
+    - assets/images/backgroud.png
+    - assets/images/discs.png

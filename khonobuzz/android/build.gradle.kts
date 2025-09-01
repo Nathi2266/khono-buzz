@@ -1,7 +1,21 @@
+plugins {
+    // id("com.google.gms.google-services") version "4.4.3" apply false // Removed to re-run flutterfire configure
+}
+
 allprojects {
     repositories {
         google()
         mavenCentral()
+    }
+}
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // classpath("com.google.gms:google-services:4.4.3") // Removed to avoid plugin version conflict
     }
 }
 

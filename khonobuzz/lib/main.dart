@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import this package for SystemChrome
-import 'package:http/http.dart' as http;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import cloud_firestore
+import 'package:firebase_auth/firebase_auth.dart'; // Import firebase_auth
+import 'package:khonobuzz/firebase_options.dart'; // Import the new firebase_options.dart
 import 'package:khonobuzz/auth_screens.dart'; // Import the new auth_screens.dart
-import 'dart:convert';
-import 'package:khonobuzz/LandingScreen.dart'; // Import the LandingScreen
+import 'package:khonobuzz/landing_screen.dart'; // Import the LandingScreen
 import 'package:flutter/rendering.dart'; // Import for debugPaintSizeEnabled
-import 'package:khonobuzz/DashboardScreen.dart'; // Import the DashboardScreen
-import 'package:khonobuzz/ResourceAllocationScreen.dart'; // Import the new ResourceAllocationScreen
-import 'package:khonobuzz/TimeAllocationScreen.dart'; // Import the new TimeAllocationScreen
-import 'package:khonobuzz/ProjectDataScreen.dart'; // Import the new ProjectDataScreen
+import 'package:khonobuzz/routes.dart'; // Import the new routes.dart
+import 'package:khonobuzz/base_screen.dart';
+import 'package:khonobuzz/dashboard_screen.dart'; // Import the dashboard_screen
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-void main() {
+void main() async {
   // Ensure that Flutter's widgets are initialized before the SystemChrome call
   WidgetsFlutterBinding.ensureInitialized();
-  
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   // This line makes the app draw full-screen, extending behind system UI overlays.
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -35,42 +39,49 @@ class AuthService {
   final String baseUrl = 'http://10.0.2.2:5000'; // For Android Emulator. Use your machine's IP for physical device.
 
   Future<String> register(String username, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/register'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
+    try {
+      // Create user with Firebase Authentication
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: username, // Assuming username is used as email for authentication
+        password: password,
+      );
+      // Save additional user data to Firestore
+      await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
         'username': username,
-        'password': password,
-      }),
-    );
-
-    if (response.statusCode == 201) {
+        'email': username,
+        'createdAt': Timestamp.now(),
+      });
       return 'Registration successful';
-    } else {
-      final responseBody = jsonDecode(response.body);
-      throw Exception(responseBody['message'] ?? 'Registration failed');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        throw Exception('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        throw Exception('The account already exists for that email.');
+      } else {
+        throw Exception('Firebase Auth Error: ${e.message}');
+      }
+    } catch (e) {
+      throw Exception('Failed to register user: $e');
     }
   }
 
   Future<String> login(String username, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'username': username,
-        'password': password,
-      }),
-    );
-
-    if (response.statusCode == 200) {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: username, // Assuming username is used as email for authentication
+        password: password,
+      );
       return 'Login successful';
-    } else {
-      final responseBody = jsonDecode(response.body);
-      throw Exception(responseBody['message'] ?? 'Invalid username or password');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        throw Exception('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        throw Exception('Wrong password provided for that user.');
+      } else {
+        throw Exception('Firebase Auth Error: ${e.message}');
+      }
+    } catch (e) {
+      throw Exception('Failed to log in: $e');
     }
   }
 }
@@ -100,32 +111,59 @@ class _MainAppState extends State<MainApp> {
     );
   }
 
-  Future<void> _register(BuildContext context) async {
+  Future<void> _register(BuildContext screenContext) async {
     try {
       final message = await _authService.register(
         _registerUsernameController.text,
         _registerPasswordController.text,
       );
+      if (!mounted) return;
       _showSnackBar(message);
       _registerUsernameController.clear();
       _registerPasswordController.clear();
-      _pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeIn); // Navigate to login screen
+      if (!mounted) return; // Move mounted check here
+      // Navigate to login screen using the provided screenContext
+      Navigator.pushReplacementNamed(screenContext, '/login');
     } catch (e) {
       _showSnackBar(e.toString(), isError: true);
     }
   }
 
-  Future<void> _login(BuildContext context) async {
+  Future<void> _login(BuildContext screenContext) async {
     try {
       final message = await _authService.login(
         _loginUsernameController.text,
         _loginPasswordController.text,
       );
+      if (!mounted) return;
       _showSnackBar(message);
-      Navigator.pushReplacementNamed(context, '/dashboard'); // Navigate to DashboardScreen using named route
+      if (!mounted) return;
+      // Navigate to BaseScreen which will then display the DashboardScreen as its body
+      Navigator.pushReplacement(
+        screenContext,
+        MaterialPageRoute(
+          builder: (context) => BaseScreen(
+            titleText: 'Dashboard', // Set the title for the BaseScreen's app bar
+            body: DashboardScreen(onLogout: _createLogoutCallback(context)), // Pass the DashboardScreen as body
+          ),
+        ),
+      );
     } catch (e) {
       _showSnackBar(e.toString(), isError: true);
     }
+  }
+
+  VoidCallback _createLogoutCallback(BuildContext context) {
+    return () => _logout();
+  }
+
+  void _logout() {
+    _loginUsernameController.clear();
+    _loginPasswordController.clear();
+    _registerUsernameController.clear();
+    _registerPasswordController.clear();
+    Navigator.pushReplacementNamed(context, '/login');
+    _showSnackBar('Logged out successfully');
   }
 
   @override
@@ -142,17 +180,17 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'KhonoBuzz',
-      debugShowCheckedModeBanner: false, // Remove the debug banner
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      scaffoldMessengerKey: scaffoldMessengerKey, // Assign the GlobalKey here
-      home: const LandingScreen(), // Set LandingScreen as the initial home
+      scaffoldMessengerKey: scaffoldMessengerKey,
+      home: const LandingScreen(), // LandingScreen is your initial entry point
       routes: {
         '/login': (context) => LoginScreen(
               usernameController: _loginUsernameController,
               passwordController: _loginPasswordController,
-              onLoginPressed: (context) => _login(context),
+              onLoginPressed: (screenContext) => _login(screenContext),
               onRegisterPressed: () {
                 Navigator.pushReplacementNamed(context, '/register');
               },
@@ -160,15 +198,29 @@ class _MainAppState extends State<MainApp> {
         '/register': (context) => RegisterScreen(
               usernameController: _registerUsernameController,
               passwordController: _registerPasswordController,
-              onRegisterPressed: (context) => _register(context),
+              onRegisterPressed: (screenContext) => _register(screenContext),
               onLoginPressed: () {
                 Navigator.pushReplacementNamed(context, '/login');
               },
             ),
-        '/dashboard': (context) => const DashboardScreen(), // Add DashboardScreen route
-        '/resource_allocation': (context) => const ResourceAllocationScreen(),
-        '/time_allocation': (context) => const TimeAllocationScreen(),
-        '/project_data': (context) => const ProjectDataScreen(),
+        // Ensure all top-level routes that should display the app's main UI
+        // are wrapped in a BaseScreen.
+        AppRoutes.dashboard: (context) => BaseScreen(
+          titleText: 'Dashboard',
+          body: DashboardScreen(onLogout: _createLogoutCallback(context)),
+        ),
+        AppRoutes.resourceAllocation: (context) => BaseScreen(
+          titleText: 'Resource Allocation',
+          body: const PlaceholderScreen(title: 'Resource Allocation'), // Assuming PlaceholderScreen is your content widget
+        ),
+        AppRoutes.timeKeeping: (context) => BaseScreen(
+          titleText: 'Time Keeping',
+          body: const PlaceholderScreen(title: 'Time Keeping'),
+        ),
+        AppRoutes.projectData: (context) => BaseScreen(
+          titleText: 'Project Data',
+          body: const PlaceholderScreen(title: 'Project Data'),
+        ),
       },
     );
   }

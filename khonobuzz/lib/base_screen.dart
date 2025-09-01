@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:khonobuzz/auth_screens.dart'; // Import BlinkingImage for the bottom animation
+import 'package:khonobuzz/auth_screens.dart'; // For BlinkingImage widget
+import 'package:khonobuzz/dashboard_screen.dart';
+import 'package:khonobuzz/resource_allocation_screen.dart';
+import 'package:khonobuzz/time_allocation_screen.dart';
+import 'package:khonobuzz/project_data_screen.dart';
 
 class BaseScreen extends StatefulWidget {
-  final Widget body;
   final String titleText;
+  final Widget? body;
 
   const BaseScreen({
     super.key,
-    required this.body,
     required this.titleText,
+    this.body,
   });
 
   @override
@@ -16,176 +20,174 @@ class BaseScreen extends StatefulWidget {
 }
 
 class _BaseScreenState extends State<BaseScreen> {
+  String _selectedMenu = 'Dashboard';
+  late Widget _currentBody;
+  late String _currentTitle;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTitle = widget.titleText.isNotEmpty ? widget.titleText : 'Dashboard';
+    _currentBody = widget.body ?? const DashboardScreen();
+  }
+
+  void _onMenuSelected(String menu) {
+    setState(() {
+      _selectedMenu = menu;
+      _currentTitle = menu;
+      switch (menu) {
+        case 'Dashboard':
+          _currentBody = const DashboardScreen();
+          break;
+        case 'Resource Allocation':
+          _currentBody = const ResourceAllocationScreen();
+          break;
+        case 'Time Keeping':
+          _currentBody = const TimeAllocationScreen();
+          break;
+        case 'Project Data':
+          _currentBody = const ProjectDataScreen();
+          break;
+        case 'Logout':
+          // Implement logout logic here or navigate to login screen
+          break;
+        default:
+          _currentBody = const DashboardScreen();
+      }
+    });
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Image.asset(
-          'assets/images/back-2.png', // Full screen background image
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-        ),
-        Scaffold(
-          backgroundColor: Colors.transparent, // Make scaffold background transparent
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: Builder(
-              builder: (BuildContext builderContext) {
-                return IconButton(
-                  icon: const Icon(
-                    Icons.menu,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                  onPressed: () {
-                    Scaffold.of(builderContext).openDrawer();
-                  },
-                );
-              },
-            ),
-            title: Image.asset(
-              'assets/images/logo.png', // Khonology logo
-              width: 150,
-            ),
-            centerTitle: true,
-            actions: [ // Removed 'const' from here
-              // User profile icon
-              Image.asset(
-                'assets/images/account_icon.png',
-                width: 30,
-                height: 30,
-                color: Colors.white, // Apply white color to the icon
-              ),
-              SizedBox(width: 15), // Spacing for the icon
-            ],
-          ),
-          drawer: Drawer(
-            backgroundColor: const Color(0xFF2D2D2D),
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                DrawerHeader(
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                  ),
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    width: 150,
-                    height: 50,
-                  ),
-                ),
-                _buildDrawerItem(
-                  context: context,
-                  iconPath: 'assets/images/Group_32151.png', // Rocket icon for Dashboard
-                  text: 'Dashboard',
-                  routeName: '/dashboard',
-                ),
-                _buildDrawerItem(
-                  context: context,
-                  iconPath: 'assets/images/rescue_icon.png', // Rescue icon for Resource Allocation
-                  text: 'Resource Allocation',
-                  routeName: '/resource_allocation',
-                ),
-                _buildDrawerItem(
-                  context: context,
-                  iconPath: 'assets/images/time_keeping.png', // Time Keeping icon
-                  text: 'Time Keeping',
-                  routeName: '/time_allocation',
-                ),
-                _buildDrawerItem(
-                  context: context,
-                  iconPath: 'assets/images/project_data.png', // Project Data icon (changed from Group_32148.png)
-                  text: 'Project Data',
-                  routeName: '/project_data',
-                ),
-                _buildDrawerItem(
-                  context: context,
-                  iconPath: 'assets/images/logout.png',
-                  text: 'Logout',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, '/login');
-                  },
-                ),
-              ],
-            ),
-          ),
-          body: Column(
+    return Scaffold(
+      backgroundColor: const Color(0xFF1E1E2C),
+      drawer: Drawer(
+        child: Container(
+          color: const Color(0xFF1C1C1C),
+          child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              DrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Color(0xFF1C1C1C),
+                ),
                 child: Row(
                   children: [
-                    Image.asset(
-                      'assets/images/Group_32151.png',
-                      width: 40,
-                      height: 40,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        widget.titleText, // Use dynamic title text
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Flexible( // Prevent overflow
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        height: 24,
+                        fit: BoxFit.contain,
                       ),
+                    ),
+                    const Spacer(),
+                    const CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      child: Icon(Icons.person, color: Colors.white),
                     ),
                   ],
                 ),
               ),
               Expanded(
-                child: widget.body, // The unique content for each screen
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    _buildRadioListTile('Dashboard', 'assets/images/rocket_icon.png'),
+                    _buildRadioListTile('Resource Allocation', 'assets/images/rocket_icon.png'),
+                    _buildRadioListTile('Time Keeping', 'assets/images/rocket_icon.png'),
+                    _buildRadioListTile('Project Data', 'assets/images/rocket_icon.png'),
+                    const Divider(color: Colors.white54),
+                    _buildRadioListTile('Logout', 'assets/images/rocket_icon.png'),
+                  ],
+                ),
               ),
             ],
           ),
         ),
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: BlinkingImage(
-            imagePath: 'assets/images/discs.png',
-          ),
+      ),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1C1C1C),
+        title: Image.asset(
+          'assets/images/logo.png',
+          height: 24,
+          fit: BoxFit.contain,
         ),
-      ],
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.grey,
+              child: Icon(Icons.person, color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/backgroud.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    _currentTitle,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Expanded(child: _currentBody),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BlinkingImage(
+              imagePath: 'assets/images/discs.png',
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildDrawerItem({
-    required BuildContext context,
-    String? iconPath,
-    IconData? iconIcon,
-    required String text,
-    String? routeName,
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      leading: iconPath != null
-          ? Image.asset(
-              iconPath,
-              width: 24,
-              height: 24,
-              color: Colors.white,
-            )
-          : (iconIcon != null
-              ? Icon(iconIcon, color: Colors.white, size: 24)
-              : null),
+  Widget _buildRadioListTile(String title, String iconPath) {
+    return RadioListTile<String>(
+      value: title,
+      groupValue: _selectedMenu,
+      activeColor: Colors.white,
       title: Text(
-        text,
-        style: const TextStyle(color: Colors.white, fontSize: 18),
+        title,
+        style: const TextStyle(color: Colors.white),
       ),
-      onTap: () {
-        if (onTap != null) {
-          onTap();
-        } else if (routeName != null) {
-          Navigator.pop(context);
-          Navigator.pushReplacementNamed(context, routeName);
+      onChanged: (value) {
+        if (value != null) {
+          _onMenuSelected(value);
         }
       },
+      secondary: SizedBox(
+        width: 24,
+        height: 24,
+        child: Image.asset(
+          iconPath,
+          color: Colors.white,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(Icons.circle, color: Colors.white, size: 24);
+          },
+        ),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
     );
   }
 }

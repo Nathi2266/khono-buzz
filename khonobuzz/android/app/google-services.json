@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "501138846456",
+    "project_id": "khonobuzzy",
+    "storage_bucket": "khonobuzzy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:501138846456:android:5ac2dcef4296ae78bdc10d",
+        "android_client_info": {
+          "package_name": "com.example.khonobuzz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCI08SmXQWX2Si7w3VDNvdQmSxVoT3B6Cw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

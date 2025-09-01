@@ -1,0 +1,16 @@
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "khonobuzz",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    }
+  ],
+  "generator": "pub",
+  "generatorVersion": "3.9.0",
+  "flutterRoot": "file:///C:/flutter",
+  "flutterVersion": "3.35.2",
+  "pubCache": "file:///C:/Users/Nkosinathi%20Radebe/AppData/Local/Pub/Cache"
+}

@@ -5,6 +5,17 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
+    implementation("com.google.firebase:firebase-analytics")
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("com.google.gms:google-services:4.4.3")
+    }
+}
+
 android {
     namespace = "com.example.khonobuzz"
     compileSdk = flutter.compileSdkVersion
@@ -28,6 +39,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     buildTypes {
