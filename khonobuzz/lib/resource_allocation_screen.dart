@@ -6,7 +6,6 @@ class ResourceAllocationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This screen should only return its body content, not a full BaseScreen
     return const Center(
       child: Text(
         'Resource Allocation Content Goes Here',

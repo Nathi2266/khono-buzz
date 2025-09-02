@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:khonobuzz/password_strength_meter.dart'; // Import the new widget
+import 'dart:ui'; // Import for ImageFilter
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _fullNameController = TextEditingController(text: 'John Doe');
   final TextEditingController _bioController = TextEditingController(text: 'Flutter developer and tech enthusiast.');
   final TextEditingController _locationController = TextEditingController(text: 'New York, USA');
   final TextEditingController _usernameController = TextEditingController(text: 'johndoe123');
   final TextEditingController _emailController = TextEditingController(text: 'john.doe@example.com');
   final TextEditingController _passwordController = TextEditingController(text: '********'); // Note: Passwords are not stored in Firestore directly
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _linkedinController = TextEditingController(text: 'linkedin.com/in/johndoe');
-  final TextEditingController _twitterController = TextEditingController(text: '@johndoe_dev');
+  final TextEditingController _xController = TextEditingController(text: '@johndoe_dev');
   final TextEditingController _jobTitleController = TextEditingController(text: 'Software Engineer');
   final TextEditingController _companyController = TextEditingController(text: 'TechCorp');
 
@@ -37,6 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       if (doc.exists) {
         final data = doc.data()!;
+        if (!mounted) return; // Guard against BuildContext use across async gaps
         setState(() {
           _fullNameController.text = data['fullName'] ?? '';
           _bioController.text = data['bio'] ?? '';
@@ -44,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _usernameController.text = data['username'] ?? '';
           _emailController.text = data['email'] ?? '';
           _linkedinController.text = data['linkedin'] ?? '';
-          _twitterController.text = data['twitter'] ?? '';
+          _xController.text = data['x'] ?? '';
           _jobTitleController.text = data['jobTitle'] ?? '';
           _companyController.text = data['company'] ?? '';
           // _passwordController is not loaded as passwords are not stored directly
@@ -52,7 +57,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     } catch (e) {
-      print('Error loading profile data: $e');
+      debugPrint('Error loading profile data: $e'); // Change print to debugPrint
+      if (!mounted) return; // Guard against BuildContext use across async gaps
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load profile data: $e')),
       );
@@ -67,8 +73,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     _linkedinController.dispose();
-    _twitterController.dispose();
+    _xController.dispose();
     _jobTitleController.dispose();
     _companyController.dispose();
     super.dispose();
@@ -77,6 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _saveChanges() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
+      if (!mounted) return; // Guard against BuildContext use across async gaps
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('You need to be logged in to save profile!')),
       );
@@ -92,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'jobTitle': _jobTitleController.text,
       'company': _companyController.text,
       'linkedin': _linkedinController.text,
-      'twitter': _twitterController.text,
+      'x': _xController.text,
       'lastUpdated': FieldValue.serverTimestamp(),
       // Add other fields as needed, e.g., 'profilePictureUrl', 'notificationPreferences'
     };
@@ -106,8 +115,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SnackBar(content: Text('Profile updated successfully!')),
       );
     } catch (e) {
+      if (!mounted) return; // Guard against BuildContext use across async gaps
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update profile: $e')),
+      );
+    }
+  }
+
+  void _changePassword() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You need to be logged in to change password!')),
+      );
+      return;
+    }
+
+    if (_newPasswordController.text.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('New password cannot be empty.')),
+      );
+      return;
+    }
+
+    if (_newPasswordController.text != _confirmPasswordController.text) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('New password and confirm password do not match.')),
+      );
+      return;
+    }
+
+    try {
+      await user.updatePassword(_newPasswordController.text);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password updated successfully! Please re-login with your new password.')),
+      );
+      _newPasswordController.clear();
+      _confirmPasswordController.clear();
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update password: ${e.message}')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An unexpected error occurred: $e')),
       );
     }
   }
@@ -125,6 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SnackBar(content: Text('Logged out successfully!')),
       );
     } catch (e) {
+      if (!mounted) return; // Guard against BuildContext use across async gaps
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error logging out: $e')),
       );
@@ -135,29 +193,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent, // Make AppBar transparent
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.white), // Change icon color to white
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           'Profile',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.white), // Change title color to white
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            _buildProfileImage(),
-            const SizedBox(height: 30),
-            _buildInfoSection(),
-            const SizedBox(height: 30),
-            _buildActionButtons(),
-          ],
-        ),
+      extendBodyBehindAppBar: true, // Extend body behind the app bar
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/bg_2.png', // Your specified background image
+              fit: BoxFit.cover,
+            ),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  _buildProfileImage(),
+                  const SizedBox(height: 30),
+                  _buildInfoSection(),
+                  const SizedBox(height: 30),
+                  _buildActionButtons(),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -199,7 +270,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildTextFieldWithLabel('Email Address', _emailController, Icons.email),
         _buildPasswordChangeField(),
         _buildTextFieldWithLabel('LinkedIn', _linkedinController, Icons.link),
-        _buildTextFieldWithLabel('Twitter', _twitterController, Icons.link),
+        _buildTextFieldWithLabel('X', _xController, Icons.link),
         _buildTextFieldWithLabel('Job Title', _jobTitleController, Icons.work),
         _buildTextFieldWithLabel('Company', _companyController, Icons.business),
         _buildNotificationPreferences(),
@@ -214,27 +285,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)), // Set text color to white
           const SizedBox(height: 8),
-          TextField(
-            controller: controller,
-            maxLines: maxLines,
-            decoration: InputDecoration(
-              prefixIcon: Icon(icon),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.black12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10), // Apply border radius to the blur effect
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Apply blur effect
+              child: TextField(
+                controller: controller,
+                maxLines: maxLines,
+                style: const TextStyle(color: Colors.white), // Ensure text is visible
+                decoration: InputDecoration(
+                  prefixIcon: Icon(icon, color: Colors.white70), // Adjust icon color
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none, // No border side for a cleaner blur look
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none, // No border side
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFFe91e63), width: 2), // Focus border color
+                  ),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.1), // Semi-transparent background
+                ),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.black12),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Color.fromARGB(255, 117, 102, 222), width: 2),
-              ),
-              filled: true,
-              fillColor: Colors.grey[100],
             ),
           ),
         ],
@@ -248,33 +326,104 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Password', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('Current Password', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)), // Set text color to white
           const SizedBox(height: 8),
-          TextField(
-            controller: _passwordController,
-            obscureText: true,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.lock),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.visibility),
-                onPressed: () {
-                  // Implement password visibility toggle
-                },
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10), // Apply border radius to the blur effect
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Apply blur effect
+              child: TextField(
+                controller: _passwordController,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white), // Ensure text is visible
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.lock, color: Colors.white70), // Adjust icon color
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.visibility, color: Colors.white70), // Adjust icon color
+                    onPressed: () {
+                      // Implement password visibility toggle
+                    },
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none, // No border side for a cleaner blur look
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none, // No border side
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFFe91e63), width: 2), // Focus border color
+                  ),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.1), // Semi-transparent background
+                ),
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.black12),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text('New Password', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)), // Set text color to white
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10), // Apply border radius to the blur effect
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Apply blur effect
+              child: TextField(
+                controller: _newPasswordController,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white), // Ensure text is visible
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.lock_open, color: Colors.white70), // Adjust icon color
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none, // No border side for a cleaner blur look
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none, // No border side
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFFe91e63), width: 2), // Focus border color
+                  ),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.1), // Semi-transparent background
+                ),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.black12),
+            ),
+          ),
+          const SizedBox(height: 10),
+          PasswordStrengthMeter(password: _newPasswordController.text),
+          const SizedBox(height: 20),
+          const Text('Confirm New Password', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)), // Set text color to white
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10), // Apply border radius to the blur effect
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Apply blur effect
+              child: TextField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white), // Ensure text is visible
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.lock_reset, color: Colors.white70), // Adjust icon color
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none, // No border side for a cleaner blur look
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none, // No border side
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFFe91e63), width: 2), // Focus border color
+                  ),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.1), // Semi-transparent background
+                ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Color.fromARGB(255, 117, 102, 222), width: 2),
-              ),
-              filled: true,
-              fillColor: Colors.grey[100],
             ),
           ),
         ],
@@ -288,8 +437,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('Notification Preferences', style: TextStyle(fontWeight: FontWeight.bold)),
-          Icon(Icons.arrow_forward_ios, size: 16),
+          Text('Notification Preferences', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)), // Set text color to white
+          Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
         ],
       ),
     );
@@ -315,7 +464,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ElevatedButton(
           onPressed: _saveChanges,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromARGB(255, 117, 102, 222),
+            backgroundColor: const Color(0xFFe91e63), // Changed to match auth screens
             padding: const EdgeInsets.symmetric(vertical: 15),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -327,18 +476,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 10),
-        OutlinedButton(
-          onPressed: _logout,
-          style: OutlinedButton.styleFrom(
+        ElevatedButton(
+          onPressed: _changePassword,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFe91e63), // Changed to match auth screens
             padding: const EdgeInsets.symmetric(vertical: 15),
-            side: const BorderSide(color: Color.fromARGB(255, 117, 102, 222)),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
           child: const Text(
+            'Change Password',
+            style: TextStyle(fontSize: 16, color: Colors.white),
+          ),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton(
+          onPressed: _logout,
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            side: const BorderSide(color: Color(0xFFe91e63)), // Changed to match auth screens
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            foregroundColor: Colors.white, // Change text color to white
+          ),
+          child: const Text(
             'Logout',
-            style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 117, 102, 222)),
+            style: TextStyle(fontSize: 16, color: Colors.white),
           ),
         ),
       ],
