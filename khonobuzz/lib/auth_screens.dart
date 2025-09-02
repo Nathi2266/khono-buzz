@@ -5,8 +5,6 @@ import 'package:khonobuzz/main.dart'; // Import main.dart for AuthService and co
 import 'dart:async'; // Added this import
 import 'package:khonobuzz/landing_screen.dart'; // Import the LandingScreen to reference in comments
 
-import 'package:flutter/material.dart';
-
 class AnimatedCatchphrase extends StatefulWidget {
   const AnimatedCatchphrase({Key? key}) : super(key: key);
 

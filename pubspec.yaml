@@ -13,3 +13,12 @@ flutter:
     - assets/images/account_icon.png
     - assets/images/24.png # Add this new image path
     # - assets/images/chevron_down_icon.png # You can remove or comment this out if no longer used
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.15.2
+  firebase_auth: ^5.7.0
+  cloud_firestore: ^5.6.12
+
+  cupertino_icons: ^1.0.6
