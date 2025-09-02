@@ -4,15 +4,18 @@ import 'package:khonobuzz/dashboard_screen.dart';
 import 'package:khonobuzz/resource_allocation_screen.dart';
 import 'package:khonobuzz/time_allocation_screen.dart';
 import 'package:khonobuzz/project_data_screen.dart';
+import 'package:khonobuzz/profile_screen.dart';
 
 class BaseScreen extends StatefulWidget {
-  final String titleText;
+  final String selectedDrawerItem;
   final Widget? body;
+  final VoidCallback? onLogout;
 
   const BaseScreen({
     Key? key,
-    required this.titleText,
+    required this.selectedDrawerItem,
     this.body,
+    this.onLogout,
   }) : super(key: key);
 
   @override
@@ -27,7 +30,7 @@ class _BaseScreenState extends State<BaseScreen> {
   @override
   void initState() {
     super.initState();
-    _currentTitle = widget.titleText.isNotEmpty ? widget.titleText : 'Dashboard';
+    _currentTitle = widget.selectedDrawerItem.isNotEmpty ? widget.selectedDrawerItem : 'Dashboard';
     _currentBody = widget.body ?? const DashboardScreen();
   }
 
@@ -49,28 +52,7 @@ class _BaseScreenState extends State<BaseScreen> {
           _currentBody = const ProjectDataScreen();
           break;
         case 'Logout':
-          // Create temporary controllers to satisfy the LoginScreen constructor.
-          // NOTE: These controllers are not disposed here, which can lead to memory leaks.
-          // It is highly recommended to refactor LoginScreen to manage its own
-          // TextEditingControllers internally within its State.
-          final TextEditingController usernameController = TextEditingController();
-          final TextEditingController passwordController = TextEditingController(); // Assuming passwordController is also required
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => LoginScreen(
-              usernameController: usernameController,
-              passwordController: passwordController,
-              onLoginPressed: (BuildContext ctx) {
-                // This function is required by LoginScreen but won't be used
-                // when navigating to it from logout.
-              },
-              onRegisterPressed: () {
-                // This function is required by LoginScreen but won't be used
-                // when navigating to it from logout.
-              },
-            )),
-          );
+          widget.onLogout?.call();
           break;
         default:
           _currentBody = const DashboardScreen();
@@ -142,9 +124,13 @@ class _BaseScreenState extends State<BaseScreen> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: SizedBox(
-              width: 32,
-              height: 32,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                );
+              },
               child: Image.asset(
                 'assets/images/account_icon.png', // Your account icon
                 fit: BoxFit.contain,

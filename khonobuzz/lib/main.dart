@@ -8,8 +8,11 @@ import 'package:khonobuzz/auth_screens.dart'; // Import the new auth_screens.dar
 import 'package:khonobuzz/landing_screen.dart'; // Import the LandingScreen
 import 'package:flutter/rendering.dart'; // Import for debugPaintSizeEnabled
 import 'package:khonobuzz/routes.dart'; // Import the new routes.dart
-import 'package:khonobuzz/base_screen.dart';
 import 'package:khonobuzz/dashboard_screen.dart'; // Import the dashboard_screen
+import 'package:khonobuzz/base_screen.dart';
+import 'package:khonobuzz/resource_allocation_screen.dart';
+import 'package:khonobuzz/time_allocation_screen.dart';
+import 'package:khonobuzz/project_data_screen.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -135,17 +138,14 @@ class _MainAppState extends State<MainApp> {
         _loginUsernameController.text,
         _loginPasswordController.text,
       );
-      if (!mounted) return;
+      if (!mounted) return; // Add mounted check here
       _showSnackBar(message);
-      if (!mounted) return;
-      // Navigate to BaseScreen which will then display the DashboardScreen as its body
+      if (!mounted) return; // Move mounted check here
+      // Navigate directly to DashboardScreen instead of using named route to bypass potential route registration issues.
       Navigator.pushReplacement(
         screenContext,
         MaterialPageRoute(
-          builder: (context) => BaseScreen(
-            titleText: 'Dashboard', // Set the title for the BaseScreen's app bar
-            body: DashboardScreen(onLogout: _createLogoutCallback(context)), // Pass the DashboardScreen as body
-          ),
+          builder: (context) => DashboardScreen(),
         ),
       );
     } catch (e) {
@@ -180,17 +180,17 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'KhonoBuzz',
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false, // Remove the debug banner
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      scaffoldMessengerKey: scaffoldMessengerKey,
-      home: const LandingScreen(), // LandingScreen is your initial entry point
+      scaffoldMessengerKey: scaffoldMessengerKey, // Assign the GlobalKey here
+      home: const LandingScreen(), // Set LandingScreen as the initial home
       routes: {
         '/login': (context) => LoginScreen(
               usernameController: _loginUsernameController,
               passwordController: _loginPasswordController,
-              onLoginPressed: (screenContext) => _login(screenContext),
+              onLoginPressed: (screenContext) => _login(screenContext), // Pass LoginScreen's context
               onRegisterPressed: () {
                 Navigator.pushReplacementNamed(context, '/register');
               },
@@ -198,29 +198,31 @@ class _MainAppState extends State<MainApp> {
         '/register': (context) => RegisterScreen(
               usernameController: _registerUsernameController,
               passwordController: _registerPasswordController,
-              onRegisterPressed: (screenContext) => _register(screenContext),
+              onRegisterPressed: (screenContext) => _register(screenContext), // Pass RegisterScreen's context
               onLoginPressed: () {
                 Navigator.pushReplacementNamed(context, '/login');
               },
             ),
-        // Ensure all top-level routes that should display the app's main UI
-        // are wrapped in a BaseScreen.
         AppRoutes.dashboard: (context) => BaseScreen(
-          titleText: 'Dashboard',
-          body: DashboardScreen(onLogout: _createLogoutCallback(context)),
-        ),
+              selectedDrawerItem: 'Dashboard',
+              onLogout: _createLogoutCallback(context),
+              body: DashboardScreen(),
+            ),
         AppRoutes.resourceAllocation: (context) => BaseScreen(
-          titleText: 'Resource Allocation',
-          body: const PlaceholderScreen(title: 'Resource Allocation'), // Assuming PlaceholderScreen is your content widget
-        ),
+              selectedDrawerItem: 'Resource Allocation',
+              body: ResourceAllocationScreen(),
+              onLogout: _createLogoutCallback(context),
+            ),
         AppRoutes.timeKeeping: (context) => BaseScreen(
-          titleText: 'Time Keeping',
-          body: const PlaceholderScreen(title: 'Time Keeping'),
-        ),
+              selectedDrawerItem: 'Time Keeping',
+              body: TimeAllocationScreen(),
+              onLogout: _createLogoutCallback(context),
+            ),
         AppRoutes.projectData: (context) => BaseScreen(
-          titleText: 'Project Data',
-          body: const PlaceholderScreen(title: 'Project Data'),
-        ),
+              selectedDrawerItem: 'Project Data',
+              body: ProjectDataScreen(),
+              onLogout: _createLogoutCallback(context),
+            ),
       },
     );
   }

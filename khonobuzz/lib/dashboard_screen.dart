@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-// import 'package:khonobuzz/base_screen.dart'; // No longer needed here
+import 'package:khonobuzz/base_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
-  final VoidCallback? onLogout;
-  const DashboardScreen({super.key, this.onLogout});
+  const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // This screen should only return its body content, not a full BaseScreen
-    return const Center(
-      child: Text(
-        'Welcome to the Dashboard!',
-        style: TextStyle(
-          color: Colors.white54,
-          fontSize: 18,
+    return BaseScreen(
+      selectedDrawerItem: 'Dashboard',
+      body: const Center(
+        child: Text(
+          'Actual Dashboard Content Goes Here!',
+          style: TextStyle(
+            color: Colors.white54,
+            fontSize: 18,
+          ),
         ),
       ),
     );
