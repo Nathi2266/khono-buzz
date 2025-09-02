@@ -6,10 +6,10 @@ class PasswordStrengthMeter extends StatefulWidget {
   const PasswordStrengthMeter({super.key, required this.password});
 
   @override
-  _PasswordStrengthMeterState createState() => _PasswordStrengthMeterState();
+  PasswordStrengthMeterState createState() => PasswordStrengthMeterState();
 }
 
-class _PasswordStrengthMeterState extends State<PasswordStrengthMeter> {
+class PasswordStrengthMeterState extends State<PasswordStrengthMeter> {
   double _strength = 0.0;
   Color _color = Colors.grey;
   String _feedback = '';

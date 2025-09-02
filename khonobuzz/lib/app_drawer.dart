@@ -24,11 +24,6 @@ class AppDrawer extends StatelessWidget {
           
           // Dashboard menu item with custom icon.
           ListTile(
-            leading: Image.asset(
-              'assets/images/Group_32151.png',
-              width: 30,
-              height: 30,
-            ),
             title: const Text(
               'Dashboard',
               style: TextStyle(
@@ -44,11 +39,6 @@ class AppDrawer extends StatelessWidget {
 
           // Resource Allocation menu item with custom icon.
           ListTile(
-            leading: Image.asset(
-              'assets/images/allocations.png',
-              width: 30,
-              height: 30,
-            ),
             title: const Text(
               'Resource Allocation',
               style: TextStyle(
@@ -64,11 +54,6 @@ class AppDrawer extends StatelessWidget {
           
           // Time Keeping menu item with custom icon.
           ListTile(
-            leading: Image.asset(
-              'assets/images/time_keeping.png',
-              width: 30,
-              height: 30,
-            ),
             title: const Text(
               'Time Keeping',
               style: TextStyle(
@@ -84,11 +69,6 @@ class AppDrawer extends StatelessWidget {
           
           // Project Data menu item with custom icon.
           ListTile(
-            leading: Image.asset(
-              'assets/images/project_data.png',
-              width: 30,
-              height: 30,
-            ),
             title: const Text(
               'Project Data',
               style: TextStyle(
@@ -104,11 +84,6 @@ class AppDrawer extends StatelessWidget {
           
           // Logout menu item.
           ListTile(
-            leading: Image.asset(
-              'assets/images/logout.png',
-              width: 30,
-              height: 30,
-            ),
             title: const Text(
               'Logout',
               style: TextStyle(

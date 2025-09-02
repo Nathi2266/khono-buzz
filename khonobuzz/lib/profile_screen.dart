@@ -5,7 +5,7 @@ import 'package:khonobuzz/password_strength_meter.dart'; // Import the new widge
 import 'dart:ui'; // Import for ImageFilter
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => ProfileScreenState();
@@ -111,6 +111,7 @@ class ProfileScreenState extends State<ProfileScreen> {
         profileData, 
         SetOptions(merge: true), // Use merge: true to update existing fields without overwriting the entire document
       );
+      if (!mounted) return; // Guard against BuildContext use across async gaps
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully!')),
       );
@@ -174,10 +175,12 @@ class ProfileScreenState extends State<ProfileScreen> {
       await FirebaseAuth.instance.signOut();
       // Navigate to the login screen or landing screen after logout
       // You might need to adjust your navigation based on your app's routing setup
+      if (!mounted) return;
       Navigator.of(context).pushNamedAndRemoveUntil(
         '/login', // Assuming '/login' is your login route
         (Route<dynamic> route) => false,
       );
+      if (!mounted) return; // Guard against BuildContext use across async gaps
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Logged out successfully!')),
       );
@@ -310,7 +313,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                     borderSide: const BorderSide(color: Color(0xFFe91e63), width: 2), // Focus border color
                   ),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.1), // Semi-transparent background
+                  fillColor: const Color.fromRGBO(255, 255, 255, 0.1), // Changed from withOpacity
                 ),
               ),
             ),
@@ -357,7 +360,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                     borderSide: const BorderSide(color: Color(0xFFe91e63), width: 2), // Focus border color
                   ),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.1), // Semi-transparent background
+                  fillColor: const Color.fromRGBO(255, 255, 255, 0.1), // Changed from withOpacity
                 ),
               ),
             ),
@@ -388,7 +391,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                     borderSide: const BorderSide(color: Color(0xFFe91e63), width: 2), // Focus border color
                   ),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.1), // Semi-transparent background
+                  fillColor: const Color.fromRGBO(255, 255, 255, 0.1), // Changed from withOpacity
                 ),
               ),
             ),
@@ -421,7 +424,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                     borderSide: const BorderSide(color: Color(0xFFe91e63), width: 2), // Focus border color
                   ),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.1), // Semi-transparent background
+                  fillColor: const Color.fromRGBO(255, 255, 255, 0.1), // Changed from withOpacity
                 ),
               ),
             ),

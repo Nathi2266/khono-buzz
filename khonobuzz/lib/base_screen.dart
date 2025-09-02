@@ -9,14 +9,14 @@ import 'package:khonobuzz/profile_screen.dart';
 class BaseScreen extends StatefulWidget {
   final String selectedDrawerItem;
   final Widget? body;
-  final VoidCallback? onLogout;
+  final void Function(BuildContext context)? onLogout; // Changed to accept BuildContext
 
   const BaseScreen({
-    Key? key,
+    super.key,
     required this.selectedDrawerItem,
     this.body,
     this.onLogout,
-  }) : super(key: key);
+  });
 
   @override
   State<BaseScreen> createState() => _BaseScreenState();
@@ -52,7 +52,7 @@ class _BaseScreenState extends State<BaseScreen> {
           _currentBody = const ProjectDataScreen();
           break;
         case 'Logout':
-          widget.onLogout?.call();
+          widget.onLogout?.call(context); // Pass BaseScreen's context
           break;
         default:
           _currentBody = const DashboardScreen();
@@ -86,12 +86,17 @@ class _BaseScreenState extends State<BaseScreen> {
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
-                    _buildRadioListTile('Dashboard', 'assets/images/rocket_icon.png'),
-                    _buildRadioListTile('Resource Allocation', 'assets/images/rocket_icon.png'),
-                    _buildRadioListTile('Time Keeping', 'assets/images/rocket_icon.png'),
-                    _buildRadioListTile('Project Data', 'assets/images/rocket_icon.png'),
+                    _buildRadioListTile('Dashboard'), // Changed to use Group_32151.png
+                    const SizedBox(height: 8), // Added spacing
+                    _buildRadioListTile('Resource Allocation'),
+                    const SizedBox(height: 8), // Added spacing
+                    _buildRadioListTile('Time Keeping'), // Using existing asset for time keeping
+                    const SizedBox(height: 8), // Added spacing
+                    _buildRadioListTile('Project Data'),
+                    const SizedBox(height: 8), // Added spacing
                     const Divider(color: Colors.white54),
-                    _buildRadioListTile('Logout', 'assets/images/rocket_icon.png'),
+                    const SizedBox(height: 8), // Added spacing
+                    _buildRadioListTile('Logout'), // No icon for logout
                   ],
                 ),
               ),
@@ -178,33 +183,26 @@ class _BaseScreenState extends State<BaseScreen> {
     );
   }
 
-  Widget _buildRadioListTile(String title, String iconPath) {
-    return RadioListTile<String>(
-      value: title,
-      groupValue: _selectedMenu,
-      activeColor: Colors.white,
-      title: Text(
-        title,
-        style: const TextStyle(color: Colors.white),
-      ),
-      onChanged: (value) {
-        if (value != null) {
-          _onMenuSelected(value);
-        }
-      },
-      secondary: SizedBox(
-        width: 24,
-        height: 24,
-        child: Image.asset(
-          iconPath,
-          color: Colors.white,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            return const Icon(Icons.circle, color: Colors.white, size: 24);
-          },
+  Widget _buildRadioListTile(String title) {
+    return ListTile(
+      title: Container(
+        decoration: BoxDecoration(
+          color: _selectedMenu == title ? const Color(0xFFe91e63) : const Color(0x33e91e63), // Apply color directly to container
+          borderRadius: BorderRadius.circular(5),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0), // Add padding for visual spacing
+        child: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white, 
+            fontWeight: FontWeight.bold
+          ), // Bold text for better visibility
         ),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+      onTap: () {
+        _onMenuSelected(title);
+      },
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0), // Set horizontal padding for ListTile
     );
   }
 }

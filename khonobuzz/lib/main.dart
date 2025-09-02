@@ -124,8 +124,7 @@ class _MainAppState extends State<MainApp> {
       _showSnackBar(message);
       _registerUsernameController.clear();
       _registerPasswordController.clear();
-      if (!mounted) return; // Move mounted check here
-      // Navigate to login screen using the provided screenContext
+      if (!screenContext.mounted) return; // Add this specific check for screenContext
       Navigator.pushReplacementNamed(screenContext, '/login');
     } catch (e) {
       _showSnackBar(e.toString(), isError: true);
@@ -138,14 +137,18 @@ class _MainAppState extends State<MainApp> {
         _loginUsernameController.text,
         _loginPasswordController.text,
       );
-      if (!mounted) return; // Add mounted check here
+      if (!mounted) return;
       _showSnackBar(message);
-      if (!mounted) return; // Move mounted check here
+      if (!screenContext.mounted) return;
       // Navigate directly to DashboardScreen instead of using named route to bypass potential route registration issues.
       Navigator.pushReplacement(
         screenContext,
         MaterialPageRoute(
-          builder: (context) => DashboardScreen(),
+          builder: (context) => BaseScreen(
+            selectedDrawerItem: 'Dashboard',
+            body: DashboardScreen(),
+            onLogout: _createLogoutCallback(),
+          ),
         ),
       );
     } catch (e) {
@@ -153,11 +156,12 @@ class _MainAppState extends State<MainApp> {
     }
   }
 
-  VoidCallback _createLogoutCallback(BuildContext context) {
-    return () => _logout();
+  // This now returns a function that accepts BuildContext
+  void Function(BuildContext) _createLogoutCallback() {
+    return (BuildContext context) => _logout(context);
   }
 
-  void _logout() {
+  void _logout(BuildContext context) {
     _loginUsernameController.clear();
     _loginPasswordController.clear();
     _registerUsernameController.clear();
@@ -203,25 +207,20 @@ class _MainAppState extends State<MainApp> {
                 Navigator.pushReplacementNamed(context, '/login');
               },
             ),
-        AppRoutes.dashboard: (context) => BaseScreen(
-              selectedDrawerItem: 'Dashboard',
-              onLogout: _createLogoutCallback(context),
-              body: DashboardScreen(),
-            ),
         AppRoutes.resourceAllocation: (context) => BaseScreen(
               selectedDrawerItem: 'Resource Allocation',
               body: ResourceAllocationScreen(),
-              onLogout: _createLogoutCallback(context),
+              onLogout: _createLogoutCallback(), // No longer pass context here
             ),
         AppRoutes.timeKeeping: (context) => BaseScreen(
               selectedDrawerItem: 'Time Keeping',
               body: TimeAllocationScreen(),
-              onLogout: _createLogoutCallback(context),
+              onLogout: _createLogoutCallback(), // No longer pass context here
             ),
         AppRoutes.projectData: (context) => BaseScreen(
               selectedDrawerItem: 'Project Data',
               body: ProjectDataScreen(),
-              onLogout: _createLogoutCallback(context),
+              onLogout: _createLogoutCallback(), // No longer pass context here
             ),
       },
     );

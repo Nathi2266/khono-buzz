@@ -23,10 +23,3 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/images/logo.png
-    - assets/images/Group_32151.png
-    - assets/images/allocations.png
-    - assets/images/time_keeping.png
-    - assets/images/project_data.png
-    - assets/images/Group_32148.png
-    - assets/images/logout.png
