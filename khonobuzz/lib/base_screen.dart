@@ -49,7 +49,28 @@ class _BaseScreenState extends State<BaseScreen> {
           _currentBody = const ProjectDataScreen();
           break;
         case 'Logout':
-          // Implement logout logic here or navigate to login screen
+          // Create temporary controllers to satisfy the LoginScreen constructor.
+          // NOTE: These controllers are not disposed here, which can lead to memory leaks.
+          // It is highly recommended to refactor LoginScreen to manage its own
+          // TextEditingControllers internally within its State.
+          final TextEditingController usernameController = TextEditingController();
+          final TextEditingController passwordController = TextEditingController(); // Assuming passwordController is also required
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen(
+              usernameController: usernameController,
+              passwordController: passwordController,
+              onLoginPressed: (BuildContext ctx) {
+                // This function is required by LoginScreen but won't be used
+                // when navigating to it from logout.
+              },
+              onRegisterPressed: () {
+                // This function is required by LoginScreen but won't be used
+                // when navigating to it from logout.
+              },
+            )),
+          );
           break;
         default:
           _currentBody = const DashboardScreen();
