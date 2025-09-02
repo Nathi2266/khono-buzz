@@ -5,6 +5,95 @@ import 'package:khonobuzz/main.dart'; // Import main.dart for AuthService and co
 import 'dart:async'; // Added this import
 import 'package:khonobuzz/landing_screen.dart'; // Import the LandingScreen to reference in comments
 
+import 'package:flutter/material.dart';
+
+class AnimatedCatchphrase extends StatefulWidget {
+  const AnimatedCatchphrase({Key? key}) : super(key: key);
+
+  @override
+  _AnimatedCatchphraseState createState() => _AnimatedCatchphraseState();
+}
+
+class _AnimatedCatchphraseState extends State<AnimatedCatchphrase> with SingleTickerProviderStateMixin {
+  final List<String> phrases = [
+    "Buzzing with innovation.",
+    "The pulse of the tech community.",
+    "Your digital tribe.",
+    "Connect. Collaborate. Create.",
+    "Ignite your cloud journey.",
+    "Where tech talks happen.",
+    "Find your tech synergy.",
+    "Get on the Khonobuzz.",
+    "Building the future, one connection at a time.",
+    "Your network, accelerated.",
+    "Plug into the cloud.",
+    "Delivering digital connections.",
+    "Shaping tomorrow, together.",
+    "The hub for tech visionaries.",
+    "Connecting data, people, and ideas.",
+    "Drive digital transformation in your network.",
+    "Where innovation finds its home.",
+    "Level up your network.",
+    "The official tech community app.",
+    "Connect with purpose.",
+  ];
+
+  late int _currentIndex;
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = 0;
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500), // fade duration
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
+
+    _controller.forward();
+
+    // Cycle phrases every 3.5 seconds including fade transition
+    Future.delayed(const Duration(milliseconds: 3500), _nextPhrase);
+  }
+
+  void _nextPhrase() {
+    _controller.reverse().then((_) {
+      setState(() {
+        _currentIndex = (_currentIndex + 1) % phrases.length;
+      });
+      _controller.forward();
+      Future.delayed(const Duration(milliseconds: 3500), _nextPhrase);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Text(
+        phrases[_currentIndex],
+        textAlign: TextAlign.center,
+        maxLines: 1, // Ensure single line
+        overflow: TextOverflow.ellipsis, // Truncate overflow with ellipsis
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Roboto', // or your preferred font
+        ),
+      ),
+    );
+  }
+}
+
 // A custom reusable widget for the styled TextField.
 class CustomTextField extends StatelessWidget {
   final String hintText;
@@ -314,22 +403,26 @@ class LoginScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min, // Changed from MainAxisAlignment.center to min for better control
                 children: <Widget>[
-                  // Custom text field for "Email Address"
+                  Image.asset(
+                    'assets/images/logo.png', // Updated logo path here
+                    height: 60,
+                  ),
+                  const SizedBox(height: 20),
+                  const AnimatedCatchphrase(), // Inserted here
+                  const SizedBox(height: 40), // Space between catchphrase and text fields
                   CustomTextField(
                     hintText: 'Email Address',
                     controller: usernameController,
                   ),
                   const SizedBox(height: 20),
-                  // Custom text field for "Password"
                   CustomTextField(
                     hintText: 'Password',
                     controller: passwordController,
                     obscureText: true,
                   ),
                   const SizedBox(height: 40),
-                  // The Confirm button
                   FlowingButton(
                     onPressed: () => onLoginPressed(context),
                     padding: const EdgeInsets.symmetric(
@@ -481,4 +574,67 @@ class RegisterScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Stack(
+      children: [
+        // Your static background here
+        Positioned.fill(
+          child: Image.asset(
+            'assets/images/your_static_background.png',
+            fit: BoxFit.cover,
+          ),
+        ),
+        SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 40), // adjust spacing as needed
+              Center(
+                child: Image.asset(
+                  'assets/images/khonology_logo_red.png',
+                  height: 60, // adjust size as per design
+                ),
+              ),
+              const SizedBox(height: 20), // space between logo and catchphrase
+              const AnimatedCatchphrase(),
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // Login button action
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pink,
+                        minimumSize: const Size.fromHeight(48),
+                      ),
+                      child: const Text('LOGIN'),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Register button action
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        minimumSize: const Size.fromHeight(48),
+                      ),
+                      child: const Text('REGISTER'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40), // bottom padding
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }
