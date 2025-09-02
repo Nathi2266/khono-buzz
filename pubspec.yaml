@@ -4,8 +4,12 @@ environment:
   sdk: '>=3.9.0 <4.0.0'
 
 flutter:
+  uses-material-design: true
   assets:
     - assets/images/logo.png
     - assets/images/rocket_icon.png
     - assets/images/backgroud.png
     - assets/images/discs.png
+    - assets/images/account_icon.png
+    - assets/images/24.png # Add this new image path
+    # - assets/images/chevron_down_icon.png # You can remove or comment this out if no longer used

@@ -10,10 +10,10 @@ class BaseScreen extends StatefulWidget {
   final Widget? body;
 
   const BaseScreen({
-    super.key,
+    Key? key,
     required this.titleText,
     this.body,
-  });
+  }) : super(key: key);
 
   @override
   State<BaseScreen> createState() => _BaseScreenState();
@@ -71,21 +71,12 @@ class _BaseScreenState extends State<BaseScreen> {
                 decoration: const BoxDecoration(
                   color: Color(0xFF1C1C1C),
                 ),
-                child: Row(
-                  children: [
-                    Flexible( // Prevent overflow
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        height: 24,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    const Spacer(),
-                    const CircleAvatar(
-                      backgroundColor: Colors.grey,
-                      child: Icon(Icons.person, color: Colors.white),
-                    ),
-                  ],
+                child: Center(
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    height: 24,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
               Expanded(
@@ -105,28 +96,47 @@ class _BaseScreenState extends State<BaseScreen> {
           ),
         ),
       ),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1C1C1C),
+      appBar: AppBar( // Reverted to standard AppBar
+        backgroundColor: const Color(0xFF1C1C1C), // App bar background color
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+              icon: Image.asset(
+                'assets/images/24.png', // Your custom drawer icon
+                color: Colors.white,
+                width: 24,
+                height: 24,
+              ),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
+        ),
         title: Image.asset(
-          'assets/images/logo.png',
+          'assets/images/logo.png', // Your app bar logo
           height: 24,
           fit: BoxFit.contain,
         ),
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey,
-              child: Icon(Icons.person, color: Colors.white),
+            padding: const EdgeInsets.only(right: 16.0),
+            child: SizedBox(
+              width: 32,
+              height: 32,
+              child: Image.asset(
+                'assets/images/account_icon.png', // Your account icon
+                fit: BoxFit.contain,
+              ),
             ),
           ),
         ],
       ),
-      body: Stack(
+      body: Stack( // Reverted to Stack for background and blinking image
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/images/backgroud.png',
+              'assets/images/backgroud.png', // Full screen background image
               fit: BoxFit.cover,
             ),
           ),
@@ -144,7 +154,7 @@ class _BaseScreenState extends State<BaseScreen> {
                     ),
                   ),
                 ),
-                Expanded(child: _currentBody),
+                Expanded(child: _currentBody), // The content of the selected screen
               ],
             ),
           ),
@@ -153,7 +163,7 @@ class _BaseScreenState extends State<BaseScreen> {
             left: 0,
             right: 0,
             child: BlinkingImage(
-              imagePath: 'assets/images/discs.png',
+              imagePath: 'assets/images/discs.png', // Blinking image at the bottom
             ),
           ),
         ],
