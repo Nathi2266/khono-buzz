@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import this package for SystemChrome
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_ai/firebase_ai.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import cloud_firestore
 import 'package:firebase_auth/firebase_auth.dart'; // Import firebase_auth
 import 'package:khonobuzz/firebase_options.dart'; // Import the new firebase_options.dart
@@ -13,6 +14,7 @@ import 'package:khonobuzz/base_screen.dart';
 import 'package:khonobuzz/resource_allocation_screen.dart';
 import 'package:khonobuzz/time_allocation_screen.dart';
 import 'package:khonobuzz/project_data_screen.dart';
+import 'package:khonobuzz/chat_bot_screen.dart'; // Import ChatBotScreen
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -105,6 +107,8 @@ class _MainAppState extends State<MainApp> {
   final TextEditingController _loginUsernameController = TextEditingController();
   final TextEditingController _loginPasswordController = TextEditingController();
 
+  late final GenerativeModel _geminiModel; // Declare GenerativeModel as a class member
+
   void _showSnackBar(String message, {bool isError = false}) {
     scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
@@ -170,6 +174,17 @@ class _MainAppState extends State<MainApp> {
     _showSnackBar('Logged out successfully');
   }
 
+  void _initializeGeminiModel() { // Made synchronous
+    // Initialize the Gemini Developer API backend service
+    _geminiModel = FirebaseAI.googleAI().generativeModel(model: 'gemini-2.5-flash');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeGeminiModel(); // Call to initialize the model synchronously
+  }
+
   @override
   void dispose() {
     _registerUsernameController.dispose();
@@ -222,6 +237,7 @@ class _MainAppState extends State<MainApp> {
               body: ProjectDataScreen(),
               onLogout: _createLogoutCallback(), // No longer pass context here
             ),
+        '/chat_bot': (context) => ChatBotScreen(geminiModel: _geminiModel), // Pass the geminiModel with direct route string
       },
     );
   }

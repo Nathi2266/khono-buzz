@@ -180,6 +180,13 @@ class _BaseScreenState extends State<BaseScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/chat_bot'); // Use string literal for route
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.chat, color: Colors.white),
+      ),
     );
   }
 
