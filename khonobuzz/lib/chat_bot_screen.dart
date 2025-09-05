@@ -1,11 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_ai/firebase_ai.dart'; // Import firebase_ai
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import cloud_firestore
+import 'package:firebase_auth/firebase_auth.dart'; // Import firebase_auth
 
 class ChatMessage {
   final String text;
   final bool isUser;
 
   ChatMessage({required this.text, required this.isUser});
+
+  // Factory constructor to create a ChatMessage from a Firestore document
+  factory ChatMessage.fromMap(Map<String, dynamic> map) {
+    return ChatMessage(
+      text: map['text'] as String,
+      isUser: map['isUser'] as bool,
+    );
+  }
+
+  // Method to convert a ChatMessage to a map for Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'text': text,
+      'isUser': isUser,
+      'timestamp': FieldValue.serverTimestamp(), // Add server timestamp
+    };
+  }
 }
 
 class ChatBotScreen extends StatefulWidget {
@@ -20,6 +39,9 @@ class ChatBotScreen extends StatefulWidget {
 class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
   final List<ChatMessage> _messages = []; // Ensure this is List<ChatMessage>
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Add Firestore instance
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Add FirebaseAuth instance
+  User? _currentUser; // To store the current user
 
   static const String _greetingMessagePart1 = 'Hello! I\'m Khonobot, your personal assistant.';
   static const String _greetingMessagePart2 = 'How can I help you today?';
@@ -30,6 +52,10 @@ class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderS
   @override
   void initState() {
     super.initState();
+    _currentUser = _auth.currentUser; // Get the current user
+    if (_currentUser != null) {
+      _loadChatHistory(); // Load chat history if user is logged in
+    }
 
     _animationController = AnimationController(
       vsync: this,
@@ -61,10 +87,50 @@ class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderS
   void _handleSubmitted(String text) {
     if (text.isEmpty) return;
     _textController.clear();
+
+    final userMessage = ChatMessage(text: text, isUser: true);
     setState(() {
-      _messages.add(ChatMessage(text: text, isUser: true));
+      _messages.add(userMessage);
     });
+    _saveMessage(userMessage); // Save user message to Firestore
     _generateGeminiResponse(text);
+  }
+
+  Future<void> _saveMessage(ChatMessage message) async {
+    if (_currentUser == null) return; // Only save if user is logged in
+    try {
+      await _firestore
+          .collection('users')
+          .doc(_currentUser!.uid)
+          .collection('chat_history')
+          .add(message.toMap());
+    } catch (e) {
+      print('Error saving message: $e');
+    }
+  }
+
+  Future<void> _loadChatHistory() async {
+    if (_currentUser == null) return; // Only load if user is logged in
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .doc(_currentUser!.uid)
+          .collection('chat_history')
+          .orderBy('timestamp', descending: true) // Order by timestamp
+          .get();
+
+      setState(() {
+        _messages.clear();
+        // Add greeting messages first
+        _messages.add(ChatMessage(text: _greetingMessagePart2, isUser: false));
+        _messages.add(ChatMessage(text: _greetingMessagePart1, isUser: false));
+        for (var doc in querySnapshot.docs.reversed) { // Iterate in reverse to maintain order
+          _messages.add(ChatMessage.fromMap(doc.data()));
+        }
+      });
+    } catch (e) {
+      print('Error loading chat history: $e');
+    }
   }
 
   Future<void> _generateGeminiResponse(String userMessage) async {
@@ -83,6 +149,7 @@ class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderS
     setState(() {
       _messages[_messages.length - 1] = ChatMessage(text: botResponse, isUser: false);
     });
+    _saveMessage(ChatMessage(text: botResponse, isUser: false)); // Save bot response to Firestore
   }
 
   @override
@@ -162,6 +229,7 @@ class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderS
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(15.0),
                 topRight: const Radius.circular(15.0),
+                
                 bottomLeft: message.isUser ? const Radius.circular(15.0) : const Radius.circular(0),
                 bottomRight: message.isUser ? const Radius.circular(0) : const Radius.circular(15.0),
               ),

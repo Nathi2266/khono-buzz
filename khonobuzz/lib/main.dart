@@ -113,19 +113,19 @@ class _MainAppState extends State<MainApp> {
     scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
+        backgroundColor: isError ? Colors.red : Colors.red, // Changed to red for both success and error
       ),
     );
   }
 
   Future<void> _register(BuildContext screenContext) async {
     try {
-      final message = await _authService.register(
+      await _authService.register(
         _registerUsernameController.text,
         _registerPasswordController.text,
       );
       if (!mounted) return;
-      _showSnackBar(message);
+      _showSnackBar('Logged in',);
       _registerUsernameController.clear();
       _registerPasswordController.clear();
       if (!screenContext.mounted) return; // Add this specific check for screenContext
@@ -137,12 +137,12 @@ class _MainAppState extends State<MainApp> {
 
   Future<void> _login(BuildContext screenContext) async {
     try {
-      final message = await _authService.login(
+      await _authService.login(
         _loginUsernameController.text,
         _loginPasswordController.text,
       );
       if (!mounted) return;
-      _showSnackBar(message);
+      _showSnackBar('Logged in',);
       if (!screenContext.mounted) return;
       // Navigate directly to DashboardScreen instead of using named route to bypass potential route registration issues.
       Navigator.pushReplacement(
@@ -171,7 +171,7 @@ class _MainAppState extends State<MainApp> {
     _registerUsernameController.clear();
     _registerPasswordController.clear();
     Navigator.pushReplacementNamed(context, '/login');
-    _showSnackBar('Logged out successfully');
+    _showSnackBar('Logged out');
   }
 
   void _initializeGeminiModel() { // Made synchronous

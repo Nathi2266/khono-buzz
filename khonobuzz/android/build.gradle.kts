@@ -1,5 +1,8 @@
 plugins {
     // id("com.google.gms.google-services") version "4.4.3" apply false // Removed to re-run flutterfire configure
+    id("com.android.application") version "8.9.1" apply false
+    id("com.google.gms.google-services") version "4.3.15" apply false
+    id("com.google.firebase.firebase-perf") version "2.0.1" apply false
 }
 
 allprojects {

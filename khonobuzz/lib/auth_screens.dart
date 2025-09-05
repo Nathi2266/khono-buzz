@@ -430,8 +430,8 @@ class LoginScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30.0),
                     ),
-                    startColor: const Color(0xFFe91e63),
-                    endColor: const Color(0xFFc2185b),
+                    startColor: Colors.red,
+                    endColor: Colors.redAccent,
                     child: const Text(
                       'CONFIRM',
                       style: TextStyle(
