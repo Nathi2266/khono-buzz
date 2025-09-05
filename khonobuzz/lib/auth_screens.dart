@@ -393,7 +393,7 @@ class LoginScreen extends StatelessWidget {
           // Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/backgroud.png',
+              'assets/images/Niice_Wrld_A_dark,_abstract_background_with_a_black_background_and_a_red_lin_b046274a-c476-47f4-a694-8922c528f1a7.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -502,7 +502,7 @@ class RegisterScreen extends StatelessWidget {
           // Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/backgroud.png',
+              'assets/images/Niice_Wrld_A_dark,_abstract_background_with_a_black_background_and_a_red_lin_b046274a-c476-47f4-a694-8922c528f1a7.png',
               fit: BoxFit.cover,
             ),
           ),

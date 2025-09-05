@@ -105,7 +105,7 @@ class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderS
           .collection('chat_history')
           .add(message.toMap());
     } catch (e) {
-      print('Error saving message: $e');
+      debugPrint('Error saving message: $e');
     }
   }
 
@@ -129,7 +129,7 @@ class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderS
         }
       });
     } catch (e) {
-      print('Error loading chat history: $e');
+      debugPrint('Error loading chat history: $e');
     }
   }
 
@@ -152,6 +152,28 @@ class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderS
     _saveMessage(ChatMessage(text: botResponse, isUser: false)); // Save bot response to Firestore
   }
 
+  Future<void> _clearChatHistory() async {
+    if (_currentUser == null) return; // Only clear if user is logged in
+    try {
+      await _firestore
+          .collection('users')
+          .doc(_currentUser!.uid)
+          .collection('chat_history')
+          .get()
+          .then((snapshot) {
+            for (var doc in snapshot.docs) {
+              doc.reference.delete();
+            }
+          });
+      setState(() {
+        _messages.clear();
+      });
+      debugPrint('Chat history cleared.');
+    } catch (e) {
+      debugPrint('Error clearing chat history: $e');
+    }
+  }
+
   @override
   void dispose() {
     _textController.dispose();
@@ -171,13 +193,23 @@ class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderS
         backgroundColor: Colors.transparent, // Make app bar transparent
         elevation: 0, // Remove app bar shadow
         iconTheme: const IconThemeData(color: Colors.white), // Set back button color to white
+        actions: [
+          IconButton(
+            icon: Image.asset(
+              'assets/images/Cancel_Exit_Escape_Red Badge_White.png',
+              width: 36, // Adjust width as needed
+              height: 36, // Adjust height as needed
+            ), // Clear chat icon
+            onPressed: () => _clearChatHistory(),
+          ),
+        ],
       ),
       extendBodyBehindAppBar: true, // Extend body behind app bar
       body: Stack(
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/images/002 1.png', // Background image
+              'assets/images/Niice_Wrld_A_dark,_abstract_background_with_a_black_background_and_a_red_lin_d01634f9-4139-422b-9c26-4428435ea403.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -221,6 +253,15 @@ class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderS
       child: Row(
         mainAxisAlignment: message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
+          // Add avatar for bot messages
+          if (!message.isUser)
+            const Padding(
+              padding: EdgeInsets.only(right: 8.0),
+              child: CircleAvatar(
+                backgroundImage: AssetImage('assets/images/Group_chatbot.png'),
+                backgroundColor: Colors.transparent, // Make background transparent if image has transparency
+              ),
+            ),
           Container(
             padding: const EdgeInsets.all(12.0),
             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
@@ -241,6 +282,14 @@ class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderS
               ),
             ),
           ),
+          // Add avatar for user messages
+          if (message.isUser)
+            const Padding(
+              padding: EdgeInsets.only(left: 8.0),
+              child: CircleAvatar(
+                child: Icon(Icons.person), // Placeholder for user avatar
+              ),
+            ),
         ],
       ),
     );
@@ -265,7 +314,11 @@ class ChatBotScreenState extends State<ChatBotScreen> with SingleTickerProviderS
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.send),
+              icon: Image.asset(
+                'assets/images/Send_Paper Plane_Red Badge_White.png',
+                width: 36, // Adjust width as needed
+                height: 36, // Adjust height as needed
+              ),
               onPressed: () => _handleSubmitted(_textController.text),
             ),
           ],

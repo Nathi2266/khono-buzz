@@ -24,3 +24,10 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/images/Niice_Wrld_A_dark,_abstract_background_with_a_black_background_and_a_red_lin_b046274a-c476-47f4-a694-8922c528f1a7.png
+    - assets/images/Niice_Wrld_A_dark,_abstract_background_with_a_black_background_and_a_red_lin_ce144728-8a69-4c91-9aa3-069deb283a9c.png
+    - assets/images/Niice_Wrld_A_dark,_abstract_background_with_a_black_background_and_a_red_lin_d01634f9-4139-422b-9c26-4428435ea403.png
+    - assets/images/chabot.png
+    - assets/images/Group_chatbot.png
+    - assets/images/Cancel_Exit_Escape_Red Badge_White.png
+    - assets/images/Send_Paper Plane_Red Badge_White.png

@@ -184,8 +184,13 @@ class _BaseScreenState extends State<BaseScreen> {
         onPressed: () {
           Navigator.pushNamed(context, '/chat_bot'); // Use string literal for route
         },
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.chat, color: Colors.white),
+        backgroundColor: Colors.transparent,
+        elevation: 0, // Remove elevation to make it truly blend with the background
+        child: Image.asset(
+          'assets/images/Group_chatbot.png',
+          width: 36, // Adjust width as needed
+          height: 36, // Adjust height as needed
+        ),
       ),
     );
   }
